@@ -73,6 +73,18 @@ void lockFunction()
 {
   int id = countLock;
   println(".:LOCK "+id+":.");
+  if( countLock == 0 )
+  {
+    println("Disable Loop");
+    lastID = 0;
+    try{
+    
+      keySim.simulate(KeyEvent.VK_P);
+    
+    }catch(AWTException e){
+      println(e);
+    }
+  }
   ++countLock;
   startTime = millis();
   delay(10000);
@@ -80,7 +92,7 @@ void lockFunction()
   --countLock;
   if( countLock == 0 )
   {
-    println("Reset videoID and Start back ground");
+    println("Enable Loop");
     lastID = 0;
     try{
     
