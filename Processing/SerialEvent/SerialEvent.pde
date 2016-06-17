@@ -2,18 +2,16 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import processing.serial.*;
-import ddf.minim.*;
 
 KeystrokeSimulator keySim;
-
 Robot robot;
-Minim minim;
-AudioPlayer player;
-boolean lock;
+
+int countLock = 0;
 
 Serial myPort;    // The serial port
 int videoID=0;  // Input string from serial port
 int startTime;
+int lastID = 25;
 
 int getSerialDevice()
 {
@@ -31,67 +29,65 @@ int getSerialDevice()
 }
  
 void setup() { 
-  size(400,200);
-  minim = new Minim(this);
-  player = minim.loadFile("audio.mp3",512);
-  lock = false;
-  
+  size(640,480);
+
   keySim = new KeystrokeSimulator();
   myPort = new Serial(this, Serial.list()[getSerialDevice()], 9600); 
   myPort.buffer(2);
+  fill(0, 102, 153);
+  textSize(50);
 } 
  
 void draw() { 
   background(0); 
-  text("Play video: " + Character.toString((char) videoID), 10,50);
-  if(lock)
+  
+  if(countLock > 0)
   {
-    fill(0, 102, 153);
-    textSize(150);
+    text("Play video: " + Character.toString((char) videoID), 10,50);
     text((int)((millis()-startTime)/1e3),213,240);
+  }else
+  {
+    text("LOOP", 10,50);
   }
+  
 } 
  
 void serialEvent(Serial p) {
   videoID = Integer.parseInt(p.readString());
   
-  if( videoID != 25 )//tag is valid
+  if( videoID != 25 && videoID != lastID)//tag is valid
   {
+    lastID = videoID;
+    thread("lockFunction");
+    try{
     
-    startTime = millis();
-    if(!lock)
-    {
-      thread("lockFunction");
+      keySim.simulate(videoID);
+    
+    }catch(AWTException e){
+      println(e);
     }
-  }
-  
-  try{
-    
-    keySim.simulate(videoID);
-    
-  }catch(AWTException e){
-    println(e);
   }
 }
 
 void lockFunction()
 {
-  println(".:LOCK:.");
-  lock = true;
-  if ( player.isPlaying() )
+  int id = countLock;
+  println(".:LOCK "+id+":.");
+  ++countLock;
+  startTime = millis();
+  delay(10000);
+  println(".:UNLOCK "+id+":.");
+  --countLock;
+  if( countLock == 0 )
   {
-    player.pause();
+    println("Reset videoID and Start back ground");
+    lastID = 0;
+    try{
+    
+      keySim.simulate(KeyEvent.VK_P);
+    
+    }catch(AWTException e){
+      println(e);
+    }
   }
-  int diff = startTime;
-  while( diff >= 35)
-  {
-    diff = (int)((millis()-startTime)/1e3);
-  }
-  if ( !player.isPlaying() )
-  {
-    player.loop();
-  }
-  //delay(10000);
-  lock = false;
-  println(".:UNLOCK:.");
 }
