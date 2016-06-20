@@ -1,24 +1,31 @@
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
+import java.util.Map;
+
 import processing.serial.*;
 
 KeystrokeSimulator keySim;
 Robot robot;
 
 int countLock = 0;
+boolean renderTimer = false;
 
 Serial myPort;    // The serial port
 int videoID=0;  // Input string from serial port
 int startTime;
 int lastID = 25;
 
+Map videoDelay = new HashMap();
+int actualDelay = 0;
+
 int getSerialDevice()
 {
   String[] devices = Serial.list();
   for(int i=0; i < devices.length ;++i)
   {
-    if( devices[i].contains("cu.usbmodem1411"))
+    println(devices[i]);
+    if( devices[i].contains("cu.usbmodem1421"))
     {
       println("Enable device: "+i);
       return i;
@@ -34,6 +41,32 @@ void setup() {
   keySim = new KeystrokeSimulator();
   myPort = new Serial(this, Serial.list()[getSerialDevice()], 9600); 
   myPort.buffer(2);
+  
+  videoDelay.put(KeyEvent.VK_Q,    10000);
+  videoDelay.put(KeyEvent.VK_W,    20000);
+  videoDelay.put(KeyEvent.VK_E,    10000);
+  videoDelay.put(KeyEvent.VK_R,    20000);
+  videoDelay.put(KeyEvent.VK_T,    10000);
+  videoDelay.put(KeyEvent.VK_Y,    10000);
+  videoDelay.put(KeyEvent.VK_U,    10000);
+  videoDelay.put(KeyEvent.VK_I,    10000);
+  videoDelay.put(KeyEvent.VK_A,    10000);
+  videoDelay.put(KeyEvent.VK_S,    10000);
+  videoDelay.put(KeyEvent.VK_D,    10000);
+  videoDelay.put(KeyEvent.VK_F,    10000);
+  videoDelay.put(KeyEvent.VK_G,    10000);
+  videoDelay.put(KeyEvent.VK_H,    10000);
+  videoDelay.put(KeyEvent.VK_J,    10000);
+  videoDelay.put(KeyEvent.VK_K,    10000);
+  videoDelay.put(KeyEvent.VK_Z,    10000);
+  videoDelay.put(KeyEvent.VK_X,    10000);
+  videoDelay.put(KeyEvent.VK_C,    10000);
+  videoDelay.put(KeyEvent.VK_V,    10000);
+  videoDelay.put(KeyEvent.VK_B,    10000);
+  videoDelay.put(KeyEvent.VK_N,    10000);
+  videoDelay.put(KeyEvent.VK_M,    10000);
+  videoDelay.put(KeyEvent.VK_COMMA,10000);
+  
   fill(0, 102, 153);
   textSize(50);
 } 
@@ -41,7 +74,7 @@ void setup() {
 void draw() { 
   background(0); 
   
-  if(countLock > 0)
+  if(renderTimer)
   {
     text("Play video: " + Character.toString((char) videoID), 10,50);
     text((int)((millis()-startTime)/1e3),213,240);
@@ -54,6 +87,9 @@ void draw() {
  
 void serialEvent(Serial p) {
   videoID = Integer.parseInt(p.readString());
+  
+  if(videoDelay.containsKey(videoID))
+    actualDelay = (int)videoDelay.get(videoID);
   
   if( videoID != 25 && videoID != lastID)//tag is valid
   {
@@ -73,6 +109,7 @@ void lockFunction()
 {
   int id = countLock;
   println(".:LOCK "+id+":.");
+  renderTimer = true;
   if( countLock == 0 )
   {
     println("Disable Loop");
@@ -87,12 +124,13 @@ void lockFunction()
   }
   ++countLock;
   startTime = millis();
-  delay(10000);
-  println(".:UNLOCK "+id+":.");
-  --countLock;
-  if( countLock == 0 )
+  delay(actualDelay);
+  println(".:UNLOCK "+id+" "+countLock+":.");
+  
+  if( (countLock - 1) == id )
   {
     println("Enable Loop");
+    renderTimer = false;
     lastID = 0;
     try{
     
