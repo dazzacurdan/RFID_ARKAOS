@@ -25,7 +25,7 @@ int getSerialDevice()
   for(int i=0; i < devices.length ;++i)
   {
     println(devices[i]);
-    if( devices[i].contains("cu.usbmodem1421"))
+    if( devices[i].contains("cu.usbmodem1421") || devices[i].contains("COM3"))
     {
       println("Enable device: "+i);
       return i;
@@ -42,25 +42,25 @@ void setup() {
   myPort = new Serial(this, Serial.list()[getSerialDevice()], 9600); 
   myPort.buffer(2);
   
-  videoDelay.put(KeyEvent.VK_Q,    10000);
-  videoDelay.put(KeyEvent.VK_W,    20000);
-  videoDelay.put(KeyEvent.VK_E,    10000);
-  videoDelay.put(KeyEvent.VK_R,    20000);
-  videoDelay.put(KeyEvent.VK_T,    10000);
-  videoDelay.put(KeyEvent.VK_Y,    10000);
-  videoDelay.put(KeyEvent.VK_U,    10000);
-  videoDelay.put(KeyEvent.VK_I,    10000);
-  videoDelay.put(KeyEvent.VK_A,    10000);
-  videoDelay.put(KeyEvent.VK_S,    10000);
-  videoDelay.put(KeyEvent.VK_D,    10000);
-  videoDelay.put(KeyEvent.VK_F,    10000);
-  videoDelay.put(KeyEvent.VK_G,    10000);
-  videoDelay.put(KeyEvent.VK_H,    10000);
-  videoDelay.put(KeyEvent.VK_J,    10000);
-  videoDelay.put(KeyEvent.VK_K,    10000);
-  videoDelay.put(KeyEvent.VK_Z,    10000);
-  videoDelay.put(KeyEvent.VK_X,    10000);
-  videoDelay.put(KeyEvent.VK_C,    10000);
+  videoDelay.put(KeyEvent.VK_Q,    60000);
+  videoDelay.put(KeyEvent.VK_W,    60000);
+  videoDelay.put(KeyEvent.VK_E,    60000);
+  videoDelay.put(KeyEvent.VK_R,    60000);
+  videoDelay.put(KeyEvent.VK_T,    60000);
+  videoDelay.put(KeyEvent.VK_Y,    60000);
+  videoDelay.put(KeyEvent.VK_U,    60000);
+  videoDelay.put(KeyEvent.VK_I,    60000);
+  videoDelay.put(KeyEvent.VK_A,    60000);
+  videoDelay.put(KeyEvent.VK_S,    60000);
+  videoDelay.put(KeyEvent.VK_D,    43000);
+  videoDelay.put(KeyEvent.VK_F,    51000);
+  videoDelay.put(KeyEvent.VK_G,    60600);
+  videoDelay.put(KeyEvent.VK_H,    48000);
+  videoDelay.put(KeyEvent.VK_J,    51000);
+  videoDelay.put(KeyEvent.VK_K,    48000);
+  videoDelay.put(KeyEvent.VK_Z,    60000);
+  videoDelay.put(KeyEvent.VK_X,    51000);
+  videoDelay.put(KeyEvent.VK_C,    60000);
   videoDelay.put(KeyEvent.VK_V,    10000);
   videoDelay.put(KeyEvent.VK_B,    10000);
   videoDelay.put(KeyEvent.VK_N,    10000);
@@ -108,12 +108,13 @@ void serialEvent(Serial p) {
 void lockFunction()
 {
   int id = countLock;
-  println(".:LOCK "+id+":.");
-  renderTimer = true;
-  if( countLock == 0 )
+  println(".:LOCK "+id+" "+countLock+":.");
+  
+  if( countLock == id && renderTimer != true)
   {
     println("Disable Loop");
     lastID = 0;
+    renderTimer = true;  
     try{
     
       keySim.simulate(KeyEvent.VK_P);
