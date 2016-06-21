@@ -108,12 +108,13 @@ void serialEvent(Serial p) {
 void lockFunction()
 {
   int id = countLock;
-  println(".:LOCK "+id+":.");
-  renderTimer = true;
-  if( countLock == 0 )
+  println(".:LOCK "+id+" "+countLock+":.");
+  
+  if( countLock == id && renderTimer != true)
   {
     println("Disable Loop");
     lastID = 0;
+    renderTimer = true;  
     try{
     
       keySim.simulate(KeyEvent.VK_P);
